@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSHAN - Manajemen Stok</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+
+<aside class="sidebar" id="sidebar">
+    <div class="brand"><div class="brand-logo">D</div><div><h2>DSHAN</h2><span>Stock Management</span></div></div>
+    <nav>
+        <button class="nav-item active" data-page="dashboard"><span>📊</span> Dashboard</button>
+        <button class="nav-item" data-page="stock"><span>📦</span> Data Stok</button>
+        <button class="nav-item" data-page="transactions"><span>🔄</span> Transaksi</button>
+        <button class="nav-item" data-page="orders"><span>🧾</span> Pesanan</button>
+        <button class="nav-item" data-page="debts"><span>📒</span> Hutang</button>
+        <button class="nav-item" data-page="opname"><span>📋</span> Stok Opname</button>
+        <button class="nav-item" data-page="reports"><span>📈</span> Laporan Bulanan</button>
+        <button class="nav-item" data-page="bookkeeping"><span>💰</span> Pembukuan</button>
+    </nav>
+    <div class="sidebar-bottom">
+        <button class="reset-btn" id="logoutBtn" hidden onclick="logout()">🚪 Keluar Akun</button>
+        <button class="reset-btn" onclick="resetAllData()">🗑️ Reset Data</button>
+    </div>
+</aside>
+
+<main class="main">
+<header class="topbar">
+    <button class="mobile-menu" onclick="toggleSidebar()">☰</button>
+    <div><h1 id="pageTitle">Dashboard</h1><p id="todayText"></p></div>
+    <div class="topbar-right"><strong>DSHAN</strong></div>
+</header>
+
+<!-- DASHBOARD -->
+<section class="page active" id="page-dashboard">
+    <div class="page-header"><div><h2>Dashboard</h2><p>Ringkasan stok dan transaksi</p></div>
+        <button class="primary-btn" onclick="openBulkProductModal()">+ Tambah Banyak Barang</button></div>
+    <div class="stats-grid" id="dashCards"></div>
+    <div class="dashboard-grid">
+        <div class="card"><div class="card-header"><div><h3>Transaksi Terbaru</h3><p>Perubahan stok terbaru</p></div>
+            <button class="text-btn" onclick="showPage('transactions')">Lihat Semua</button></div><div id="recentTransactions"></div></div>
+        <div class="card"><div class="card-header"><div><h3>Stok Menipis</h3><p>Barang di bawah minimum stok</p></div></div><div id="lowStockList"></div></div>
+    </div>
+</section>
+
+<!-- DATA STOK -->
+<section class="page" id="page-stock">
+    <div class="page-header"><div><h2>Data Stok</h2><p>Kelola seluruh barang dan jumlah stok</p></div>
+        <button class="primary-btn" onclick="openBulkProductModal()">+ Tambah Banyak Barang</button></div>
+    <div class="card">
+        <div class="toolbar">
+            <div class="search-box">🔍 <input type="text" id="stockSearch" placeholder="Cari kode atau nama barang..." oninput="renderStock()"></div>
+            <select id="stockCategory" onchange="renderStock()"><option value="">Semua Barang</option><option value="Reseller">Ada transaksi Reseller</option><option value="Pemakai">Ada transaksi Pemakai</option></select>
+            <select id="stockGarmentFilter" onchange="renderStock()"></select>
+            <select id="stockGenderFilter" onchange="renderStock()"><option value="">Semua Jenis Kelamin</option><option>Cowok</option><option>Cewek</option><option>Tidak Ada</option></select>
+        </div>
+        <div class="table-wrapper"><table>
+            <thead><tr><th class="col-photo">Foto</th><th class="col-code">Kode</th><th class="col-name">Nama Barang</th><th class="col-type">Jenis Barang / Bahan</th><th class="col-stock">Stok</th><th class="col-size">Ukuran</th><th>Masuk</th><th>Keluar Reseller</th><th>Keluar Pemakai</th><th>Stok per Varian</th><th>Modal Awal</th><th>Harga Reseller</th><th>Harga Pemakai</th><th>Aksi</th></tr></thead>
+            <tbody id="stockTable"></tbody></table></div>
+    </div>
+</section>
+
+<!-- TRANSAKSI -->
+<section class="page" id="page-transactions">
+    <div class="page-header"><div><h2>Transaksi</h2><p>Semua perubahan stok tercatat di sini</p></div>
+        <button class="primary-btn" onclick="openTransactionModal()">+ Transaksi Baru</button></div>
+    <div class="stats-grid mini" id="trxCards"></div>
+    <div class="card">
+        <div class="toolbar">
+            <div class="search-box">🔍 <input type="text" id="transactionSearch" placeholder="Cari transaksi..." oninput="renderTransactions()"></div>
+            <select id="transactionType" onchange="renderTransactions()"><option value="">Semua Transaksi</option><option>Masuk</option><option>Keluar</option></select>
+            <select id="transactionCustomerType" onchange="renderTransactions()"><option value="">Semua Pelanggan</option><option>Reseller</option><option>Pemakai</option></select>
+            <select id="transactionGarmentFilter" onchange="renderTransactions()"></select>
+            <select id="transactionGenderFilter" onchange="renderTransactions()"><option value="">Semua Jenis Kelamin</option><option>Cowok</option><option>Cewek</option><option>Tidak Ada</option></select>
+            <select id="transactionSize" onchange="renderTransactions()"></select>
+            <input type="month" id="transactionMonth" onchange="renderTransactions()">
+        </div>
+        <div class="table-wrapper"><table>
+            <thead><tr><th>Tanggal</th><th>Barang</th><th>Jenis Bahan</th><th>Kelamin</th><th>Ukuran</th><th>Kategori</th><th>Tipe</th><th>Qty</th><th>Harga</th><th>Total</th><th>Keuntungan</th><th>Kerugian</th><th>Keterangan</th><th>Aksi</th></tr></thead>
+            <tbody id="transactionTable"></tbody></table></div>
+    </div>
+</section>
+
+<!-- PESANAN -->
+<section class="page" id="page-orders">
+    <div class="page-header"><div><h2>Pesanan</h2><p>Dikemas → Dikirim → Selesai. Stok otomatis berkurang saat pesanan dicatat.</p></div>
+        <button class="primary-btn" onclick="openOrderModal()">+ Catat Pesanan</button></div>
+    <div class="stats-grid mini" id="orderCards"></div>
+    <div class="card">
+        <div class="toolbar"><select id="orderStatusFilter" onchange="renderOrders()"><option value="">Semua Status</option><option>Diterima</option><option>Dikemas</option><option>Dikirim</option><option>Selesai</option><option>Batal</option></select></div>
+        <div class="table-wrapper"><table>
+            <thead><tr><th>Tanggal</th><th>Pelanggan</th><th>Barang</th><th>Kategori</th><th>Total</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody id="orderTable"></tbody></table></div>
+    </div>
+</section>
+
+<!-- HUTANG -->
+<section class="page" id="page-debts">
+    <div class="page-header"><div><h2>Hutang</h2><p>Pelanggan yang belum membayar. Tekan Selesai Membayar, dan nama hilang dari daftar.</p></div>
+        <button class="primary-btn" onclick="openDebtModal()">+ Catat Hutang</button></div>
+    <div class="stats-grid mini">
+        <div class="stat-card"><div class="stat-icon red">📒</div><div><span>Total Hutang</span><strong id="debtTotal">Rp 0</strong></div></div>
+        <div class="stat-card"><div class="stat-icon yellow">👤</div><div><span>Jumlah Penghutang</span><strong id="debtCount">0</strong></div></div>
+    </div>
+    <div class="card"><div class="table-wrapper"><table>
+        <thead><tr><th>Tanggal</th><th>Pelanggan</th><th>Barang</th><th>Jumlah Hutang</th><th>Status Pesanan</th><th>Aksi</th></tr></thead>
+        <tbody id="debtTable"></tbody></table></div></div>
+</section>
+
+<!-- OPNAME -->
+<section class="page" id="page-opname">
+    <div class="page-header"><div><h2>Stok Opname</h2><p>Bandingkan stok sistem dengan stok fisik</p></div>
+        <button class="primary-btn" onclick="openOpnameModal()">+ Stok Opname</button></div>
+    <div class="stats-grid mini" id="opnameCards"></div>
+    <div class="card"><div class="table-wrapper"><table>
+        <thead><tr><th>Tanggal</th><th>Barang</th><th>Ukuran</th><th>Kategori</th><th>Stok Sistem</th><th>Stok Fisik</th><th>Selisih</th><th>Status</th><th>Keterangan</th><th>Aksi</th></tr></thead>
+        <tbody id="opnameTable"></tbody></table></div></div>
+</section>
+
+<!-- LAPORAN -->
+<section class="page" id="page-reports">
+    <div class="page-header"><div><h2>Laporan Bulanan</h2><p>Ringkasan transaksi berdasarkan bulan, pelanggan, dan ukuran.</p></div>
+        <button class="secondary-btn" onclick="exportCSV()">📥 Export CSV</button></div>
+    <div class="report-filter"><label>Pilih Bulan <input type="month" id="reportMonth" onchange="renderReport()"></label></div>
+    <div class="stats-grid" id="reportCards"></div>
+    <div class="dashboard-grid">
+        <div class="card"><div class="card-header"><div><h3>Grafik Transaksi</h3><p>Perbandingan barang masuk dan keluar</p></div></div>
+            <div class="chart">
+                <div class="chart-row"><span>Masuk</span><div class="bar-container"><div class="bar incoming" id="barIncoming"></div></div><strong id="chartIncoming">0</strong></div>
+                <div class="chart-row"><span>Keluar</span><div class="bar-container"><div class="bar outgoing" id="barOutgoing"></div></div><strong id="chartOutgoing">0</strong></div>
+            </div></div>
+        <div class="card"><div class="card-header"><div><h3>Total Keseluruhan</h3><p>Nilai persediaan saat ini</p></div></div>
+            <div class="big-total" id="reportInventoryValue">Rp 0</div><div class="total-label">Nilai seluruh stok yang tersedia</div></div>
+    </div>
+    <div class="card"><div class="card-header"><div><h3>Detail Laporan Barang</h3><p>Pergerakan barang pada bulan terpilih</p></div></div>
+        <div class="table-wrapper"><table>
+            <thead><tr><th>Nama Barang</th><th>Jenis Bahan</th><th>Kelamin</th><th>Masuk</th><th>Terjual</th><th>Sisa Stok</th><th>Reseller</th><th>Pemakai</th><th>Bersih Reseller</th><th>Bersih Pemakai</th><th>Total Bersih</th></tr></thead>
+            <tbody id="reportTable"></tbody></table></div></div>
+    <div class="card"><div class="card-header"><div><h3>Rincian Pendapatan Harian</h3><p>Nilai penjualan dari harga jual, laba bersih dari margin penjualan.</p></div></div>
+        <div class="table-wrapper"><table>
+            <thead><tr><th>Tanggal</th><th>Masuk</th><th>Keluar</th><th>Nilai Modal Masuk</th><th>Nilai Penjualan Keluar</th><th>Pendapatan Bersih</th></tr></thead>
+            <tbody id="dailyReportTable"></tbody></table></div></div>
+</section>
+
+<!-- PEMBUKUAN -->
+<section class="page" id="page-bookkeeping">
+    <div class="page-header"><div><h2>💰 Pembukuan Usaha</h2><p>Catat modal awal, produksi, pengeluaran, omzet dan keuntungan.</p></div>
+        <div class="bk-toolbar">
+            <label class="bk-period-label">Periode <input type="month" id="bkMonthFilter" onchange="renderBookkeeping()"></label>
+            <button class="secondary-btn bk-btn" onclick="bkExportCSV()">⬇️ Export CSV</button>
+            <button class="secondary-btn bk-btn" onclick="bkPrint()">🖨️ Cetak</button>
+        </div></div>
+    <div class="bk-stats-grid" id="bkCards"></div>
+    <div class="bk-content-grid">
+        <div class="panel bk-panel"><div class="panel-header"><div><h2>Modal Awal</h2><p>Modal yang tersedia pada bulan tertentu.</p></div>
+            <button class="primary-btn" onclick="bkOpenModalForm()">+ Atur Modal</button></div>
+            <div class="bk-highlight"><span>Modal bulan terpilih</span><strong id="bkModalHighlight">Rp 0</strong></div>
+            <div class="bk-mini-grid"><div><span>Total Modal Produksi</span><strong id="bkMiniProductionCost">Rp 0</strong></div>
+                <div><span>Pengeluaran Lain</span><strong id="bkMiniExpenses">Rp 0</strong></div>
+                <div><span>Saldo Kas Perkiraan</span><strong id="bkMiniCash">Rp 0</strong></div></div></div>
+        <div class="panel bk-panel"><div class="panel-header"><div><h2>Penjualan & Keuntungan</h2><p>Otomatis membaca transaksi keluar.</p></div></div>
+            <div class="bk-profit-list"><div><span>Penjualan Reseller</span><strong id="bkResellerSales">Rp 0</strong></div>
+                <div><span>Penjualan Pemakai</span><strong id="bkPemakaiSales">Rp 0</strong></div>
+                <div><span>Jumlah barang terjual</span><strong id="bkSalesQty">0 pcs</strong></div>
+                <div class="positive"><span>Laba bersih bulan ini</span><strong id="bkNetHighlight">Rp 0</strong></div></div></div>
+    </div>
+    <div class="panel bk-panel"><div class="panel-header"><div><h2>Produksi Baju</h2><p>Catatan jumlah produksi dan modal per baju. Stok fisik tetap dikelola lewat menu Transaksi.</p></div>
+        <button class="primary-btn" onclick="bkOpenProductionForm()">+ Tambah Produksi</button></div>
+        <div class="table-wrapper"><table class="bk-table"><thead><tr><th>Tanggal</th><th>Jenis Barang</th><th>Jumlah</th><th>Modal / Baju</th><th>Total Modal</th><th>Keterangan</th><th>Aksi</th></tr></thead><tbody id="bkProductionTable"></tbody></table></div></div>
+    <div class="panel bk-panel"><div class="panel-header"><div><h2>Pengeluaran Lain</h2><p>Biaya operasional di luar modal produksi.</p></div>
+        <button class="primary-btn" onclick="bkOpenExpenseForm()">+ Tambah Pengeluaran</button></div>
+        <div class="table-wrapper"><table class="bk-table"><thead><tr><th>Tanggal</th><th>Keterangan</th><th>Kategori</th><th>Jumlah</th><th>Aksi</th></tr></thead><tbody id="bkExpenseTable"></tbody></table></div></div>
+    <div class="panel bk-panel"><div class="panel-header"><div><h2>Ringkasan Bulanan</h2><p>Perhitungan dari transaksi dan pembukuan.</p></div></div>
+        <div class="bk-report-grid" id="bkReportGrid"></div>
+        <div class="bk-chart-card"><div class="bk-chart-head"><div><h3>Penjualan Harian</h3><p>Omzet per hari pada bulan terpilih.</p></div></div><div id="bkDailyChart" class="bk-daily-chart"></div></div></div>
+    <div class="panel bk-panel"><div class="panel-header"><div><h2>Backup & Restore</h2><p>Simpan semua data (stok, pesanan, pembukuan) ke satu file JSON.</p></div></div>
+        <div class="bk-backup-actions"><button class="secondary-btn" onclick="bkBackup()">💾 Backup Semua Data</button>
+            <label class="bk-restore-label">📂 Restore Data <input type="file" id="bkRestoreFile" accept=".json,application/json" onchange="bkRestore(this)"></label></div></div>
+</section>
+</main>
+</div>
+
+<!-- MODAL: TAMBAH BANYAK BARANG -->
+<div class="modal-overlay" id="bulkProductModal"><div class="modal large">
+    <div class="modal-header"><div><h2>Tambah Banyak Barang</h2><p>Baris kosong dilewati. Stok awal: isi angka dipisah garis miring sesuai urutan ukuran.</p></div><button class="close-btn" onclick="closeModal('bulkProductModal')">×</button></div>
+    <form id="bulkProductForm" novalidate onsubmit="saveBulkProducts(event)">
+        <div class="bulk-table-wrapper"><table class="bulk-table bulk-table-v2">
+            <thead><tr><th>Kode</th><th>Nama Barang</th><th>Jenis Barang / Bahan</th><th>Jenis Kelamin</th><th>Ukuran &amp; Stok Awal</th><th>Satuan</th><th>Harga Reseller</th><th>Harga Pemakai</th><th>Modal Awal Bikin Baju</th><th>Foto</th><th></th></tr></thead>
+            <tbody id="bulkProductRows"></tbody></table></div>
+        <div class="bulk-actions"><button type="button" class="secondary-btn" onclick="addBulkRow()">+ Tambah Baris</button>
+            <div><button type="button" class="cancel-btn" onclick="closeModal('bulkProductModal')">Batal</button> <button type="submit" class="primary-btn">💾 Simpan Semua Barang</button></div></div>
+    </form></div></div>
+
+<!-- MODAL: EDIT BARANG -->
+<div class="modal-overlay" id="productModal"><div class="modal">
+    <div class="modal-header"><h2 id="productModalTitle">Edit Barang</h2><button class="close-btn" onclick="closeModal('productModal')">×</button></div>
+    <form id="productForm" onsubmit="saveProduct(event)">
+        <input type="hidden" id="productId">
+        <div class="form-grid">
+            <label>Kode Barang<input id="productCode" required></label>
+            <label>Nama Barang<input id="productName" required></label>
+            <div class="form-field-full variant-manager" id="variantEditor"></div>
+            <label>Minimum Stok<input type="number" id="productMinStock" min="0" value="0"></label>
+            <label>Satuan<input id="productUnit" value="pcs"></label>
+            <label>Harga Reseller<input type="number" id="productResellerPrice" min="0" value="0" required></label>
+            <label>Harga Pemakai<input type="number" id="productPemakaiPrice" min="0" value="0" required></label>
+            <label>Modal Awal Bikin Baju<input type="number" id="productInitialCost" min="0" value="0"></label>
+            <label>Foto Barang<input type="file" id="productPhoto" accept="image/*"></label>
+        </div>
+        <div id="productPhotoPreview" class="photo-preview"></div>
+        <div class="modal-actions"><button type="button" class="cancel-btn" onclick="closeModal('productModal')">Batal</button><button type="submit" class="primary-btn">Simpan Barang</button></div>
+    </form></div></div>
+
+<!-- MODAL: TRANSAKSI -->
+<div class="modal-overlay" id="transactionModal"><div class="modal">
+    <div class="modal-header"><div><h2>Transaksi Stok</h2><p>Perubahan otomatis memengaruhi stok</p></div><button class="close-btn" onclick="closeModal('transactionModal')">×</button></div>
+    <form id="transactionForm" onsubmit="saveTransaction(event)">
+        <div class="form-grid">
+            <label>Tanggal<input type="date" id="transactionDate" required></label>
+            <label>Barang<select id="transactionProduct" required></select></label>
+            <label>Jenis Bahan / Varian<select id="transactionVariant" required></select></label>
+            <label>Jenis Barang<input id="transactionMaterial" readonly></label>
+            <label>Jenis Kelamin<input id="transactionGender" readonly></label>
+            <label>Jenis<select id="transactionTypeInput"><option>Masuk</option><option>Keluar</option></select></label>
+            <label>Pembeli<select id="transactionCategoryInput"><option>Reseller</option><option>Pemakai</option></select></label>
+            <label class="tx-sale-only" hidden>Nama Pelanggan<input id="transactionCustomer" placeholder="Nama pembeli"></label>
+            <label class="tx-sale-only" hidden>Nomor WhatsApp<input id="transactionPhone" inputmode="tel" placeholder="08123456789"></label>
+            <label class="tx-sale-only" hidden>Pembayaran<select id="transactionPaid"><option value="Lunas">Sudah dibayar</option><option value="Belum">Belum bayar (hutang)</option></select></label>
+            <label>Ukuran<select id="transactionSizeInput" required></select></label>
+            <label>Jumlah<input type="number" id="transactionQty" min="1" value="1" required><small id="stockInfo"></small></label>
+            <label>Harga Satuan (otomatis)<input type="number" id="transactionPrice" value="0" readonly></label>
+        </div>
+        <label>Keterangan<textarea id="transactionNote" rows="2" placeholder="Contoh: stok masuk dari supplier..."></textarea></label>
+        <div class="transaction-preview"><span>Total Transaksi</span><strong id="transactionTotalPreview">Rp 0</strong></div>
+        <div class="modal-actions"><button type="button" class="cancel-btn" onclick="closeModal('transactionModal')">Batal</button><button type="submit" class="primary-btn">Simpan Transaksi</button></div>
+    </form></div></div>
+
+<!-- MODAL: CATAT HUTANG -->
+<div class="modal-overlay" id="debtModal"><div class="modal">
+    <div class="modal-header"><div><h2>Catat Hutang</h2><p>Langsung catat tanpa mengubah stok.</p></div><button class="close-btn" onclick="closeModal('debtModal')">×</button></div>
+    <form id="debtForm" onsubmit="saveDebt(event)">
+        <div class="form-grid">
+            <label>Tanggal<input type="date" id="debtDate" required></label>
+            <label>Nama Pelanggan<input id="debtCustomer" placeholder="Nama yang berhutang" required></label>
+            <label>Nomor WhatsApp<input id="debtPhone" inputmode="tel" placeholder="08123456789"></label>
+            <label>Jumlah Hutang (Rp)<input type="number" id="debtAmount" min="1" placeholder="0" required></label>
+        </div>
+        <label>Keterangan<textarea id="debtNote" rows="2" placeholder="Contoh: 2 jaket parasut, bayar minggu depan"></textarea></label>
+        <div class="modal-actions"><button type="button" class="cancel-btn" onclick="closeModal('debtModal')">Batal</button><button type="submit" class="primary-btn">Simpan Hutang</button></div>
+    </form></div></div>
+
+<!-- MODAL: PESANAN -->
+<div class="modal-overlay" id="orderModal"><div class="modal large">
+    <div class="modal-header"><div><h2>Catat Pesanan</h2><p>Stok langsung berkurang saat pesanan disimpan, lalu tinggal tekan Kirim.</p></div><button class="close-btn" onclick="closeModal('orderModal')">×</button></div>
+    <form id="orderForm" onsubmit="saveOrder(event)">
+        <div class="form-grid">
+            <label>Nama Pelanggan<input id="orderCustomer" required></label>
+            <label>Nomor WhatsApp<input id="orderPhone" inputmode="tel" placeholder="08123456789"></label>
+            <label>Pembeli<select id="orderCategory"><option>Reseller</option><option>Pemakai</option></select></label>
+            <label>Pembayaran<select id="orderPaid"><option value="Lunas">Sudah dibayar</option><option value="Belum">Belum bayar (hutang)</option></select></label>
+            <label>Catatan<input id="orderNote"></label>
+        </div>
+        <div id="orderItems"></div>
+        <button type="button" class="secondary-btn" onclick="addOrderItem()">+ Tambah Barang</button>
+        <div class="modal-actions"><button type="button" class="cancel-btn" onclick="closeModal('orderModal')">Batal</button><button type="submit" class="primary-btn">Simpan Pesanan</button></div>
+    </form></div></div>
+
+<!-- MODAL: OPNAME -->
+<div class="modal-overlay" id="opnameModal"><div class="modal">
+    <div class="modal-header"><div><h2>Stok Opname</h2><p>Masukkan hasil stok fisik</p></div><button class="close-btn" onclick="closeModal('opnameModal')">×</button></div>
+    <form id="opnameForm" onsubmit="saveOpname(event)">
+        <label>Tanggal<input type="date" id="opnameDate" required></label>
+        <label>Barang<select id="opnameProduct" required></select></label>
+        <label>Varian<select id="opnameVariant" required></select></label>
+        <label>Ukuran<select id="opnameSize" required></select></label>
+        <div class="opname-info"><div><span>Stok Sistem</span><strong id="opnameSystemStock">0</strong></div><div><span>Selisih</span><strong id="opnameDifference">0</strong></div></div>
+        <label>Stok Fisik<input type="number" id="opnamePhysicalStock" min="0" value="0" required></label>
+        <label>Keterangan<textarea id="opnameNote" rows="2"></textarea></label>
+        <div class="modal-actions"><button type="button" class="cancel-btn" onclick="closeModal('opnameModal')">Batal</button><button type="submit" class="primary-btn">Simpan Opname</button></div>
+    </form></div></div>
+
+<!-- MODAL: PEMBUKUAN -->
+<div class="modal-overlay" id="bkModalForm"><div class="modal bk-modal">
+    <div class="modal-header"><div><h2>Modal Awal</h2><p>Simpan modal awal berdasarkan bulan.</p></div><button class="close-btn" onclick="closeModal('bkModalForm')">×</button></div>
+    <form onsubmit="bkSaveModal(event)">
+        <label>Bulan<input type="month" id="bkModalMonth" required></label>
+        <label>Modal Awal<input type="number" id="bkModalAmount" min="0" step="1" placeholder="Contoh: 10000000" required></label>
+        <div class="modal-actions"><button type="button" class="cancel-btn" onclick="closeModal('bkModalForm')">Batal</button><button type="submit" class="primary-btn">Simpan Modal</button></div>
+    </form></div></div>
+<div class="modal-overlay" id="bkProductionForm"><div class="modal bk-modal">
+    <div class="modal-header"><div><h2>Produksi</h2><p>Catat jumlah baju yang dibuat dan modal per baju.</p></div><button class="close-btn" onclick="closeModal('bkProductionForm')">×</button></div>
+    <form id="bkProductionFormElement" onsubmit="bkSaveProduction(event)">
+        <input type="hidden" id="bkProductionId">
+        <label>Tanggal<input type="date" id="bkProductionDate" required></label>
+        <label>Jenis Barang<input type="text" id="bkProductionName" placeholder="Contoh: Kaos DSHAN Hitam" required></label>
+        <label>Jumlah Baju<input type="number" id="bkProductionQty" min="1" step="1" required></label>
+        <label>Modal / Baju<input type="number" id="bkProductionUnitCost" min="0" step="1" required></label>
+        <label>Keterangan<textarea id="bkProductionNote" rows="2"></textarea></label>
+        <div class="bk-live-total">Total Modal: <strong id="bkProductionTotalPreview">Rp 0</strong></div>
+        <div class="modal-actions"><button type="button" class="cancel-btn" onclick="closeModal('bkProductionForm')">Batal</button><button type="submit" class="primary-btn">Simpan Produksi</button></div>
+    </form></div></div>
+<div class="modal-overlay" id="bkExpenseForm"><div class="modal bk-modal">
+    <div class="modal-header"><div><h2>Pengeluaran</h2><p>Catat pengeluaran operasional usaha.</p></div><button class="close-btn" onclick="closeModal('bkExpenseForm')">×</button></div>
+    <form id="bkExpenseFormElement" onsubmit="bkSaveExpense(event)">
+        <input type="hidden" id="bkExpenseId">
+        <label>Tanggal<input type="date" id="bkExpenseDate" required></label>
+        <label>Keterangan<input type="text" id="bkExpenseNote" placeholder="Contoh: Plastik kemasan" required></label>
+        <label>Kategori<select id="bkExpenseCategory"><option>Operasional</option><option>Transportasi</option><option>Kemasan</option><option>Promosi</option><option>Lainnya</option></select></label>
+        <label>Jumlah<input type="number" id="bkExpenseAmount" min="1" step="1" required></label>
+        <div class="modal-actions"><button type="button" class="cancel-btn" onclick="closeModal('bkExpenseForm')">Batal</button><button type="submit" class="primary-btn">Simpan Pengeluaran</button></div>
+    </form></div></div>
+
+<!-- MODAL: LOGIN (mode cloud) -->
+<div class="modal-overlay" id="loginModal"><div class="modal">
+    <div class="modal-header"><div><h2>Masuk ke DSHAN</h2><p>Login untuk memakai data bersama.</p></div></div>
+    <form onsubmit="login(event)">
+        <label>Email<input id="loginEmail" type="email" autocomplete="username" required></label>
+        <label>Password<input id="loginPassword" type="password" autocomplete="current-password" required></label>
+        <div class="modal-actions"><button type="submit" class="primary-btn">Masuk</button></div>
+    </form></div></div>
+
+<div id="toast" class="toast"></div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script src="orders.js"></script>
+<script src="sync.js"></script>
+</body>
+</html>
